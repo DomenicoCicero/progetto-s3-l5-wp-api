@@ -6,7 +6,7 @@ const SingleCard = props => {
     <Card>
       <Card.Body>
         <Card.Title>{props.post.title.rendered}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">{props.post.author}</Card.Subtitle>
+        <Card.Subtitle className="mb-2 text-muted">{props.post._embedded.author[0].name}</Card.Subtitle>
         <div dangerouslySetInnerHTML={{ __html: props.post.content.rendered.substring(0, 30) + "..." }}></div>
         <p>
           <span className="fw-semibold">status: </span>
@@ -20,18 +20,33 @@ const SingleCard = props => {
           <span className="fw-semibold">modified: </span>
           {props.post.modified.substring(0, 10)}
         </p>
-        <p>
-          <span className="fw-semibold">category: </span>
-          {props.post.categories[0]}
-        </p>
-        {props.post.tags.length !== 0 && (
+        {props.post.categories.length !== 0 && (
           <p>
-            <span className="fw-semibold">tags: </span>
-            {props.post.tags[0]}
+            <span className="fw-semibold">category: </span>
+            {props.post._embedded["wp:term"][0].map(category => {
+              return (
+                <span key={category.id} className="badge rounded-pill text-bg-primary">
+                  {category.name}
+                </span>
+              );
+            })}
           </p>
         )}
 
-        <Card.Link href={props.post.link} target="_blanck">
+        {props.post.tags.length !== 0 && (
+          <p>
+            <span className="fw-semibold">tags: </span>
+            {props.post._embedded["wp:term"][1].map(tag => {
+              return (
+                <span key={tag.id} className="badge rounded-pill text-bg-primary">
+                  {tag.name}
+                </span>
+              );
+            })}
+          </p>
+        )}
+
+        <Card.Link href={props.post.link} target="_blanck" className="d-block">
           Vai al sito
         </Card.Link>
         <Link to={`post/${props.post.id}`}>

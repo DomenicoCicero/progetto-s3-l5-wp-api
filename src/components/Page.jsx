@@ -1,33 +1,14 @@
-import { useEffect, useState } from "react";
-import { baseUrl } from "../constant";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import SingleCard from "./SingleCard";
+import { baseUrl } from "../constant";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SinglePage from "./SinglePage";
 
-const Home = () => {
-  const [posts, setPosts] = useState([]);
+const Page = () => {
+  const [pages, setPages] = useState([]);
   const [lastPage, setLastPage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
-
-  const getPosts = () => {
-    fetch(`${baseUrl}/posts?page=${currentPage}&_embed=1`)
-      .then(response => {
-        if (response.ok) {
-          setLastPage(parseInt(response.headers.get("X-WP-TotalPages")));
-          return response.json();
-        } else {
-          throw new Error("Errore nel reperimento dei dati");
-        }
-      })
-      .then(data => {
-        console.log(data);
-        setPosts(data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
 
   const generatePaginationArray = () => {
     let paginationArr = [];
@@ -44,23 +25,42 @@ const Home = () => {
     setCurrentPage(page);
   };
 
+  const getPage = () => {
+    fetch(`${baseUrl}/pages?page=${currentPage}&_embed=1`)
+      .then(response => {
+        if (response.ok) {
+          setLastPage(parseInt(response.headers.get("X-WP-TotalPages")));
+          return response.json();
+        } else {
+          throw new Error("errore nel reperimento dei dati");
+        }
+      })
+      .then(data => {
+        console.log(data);
+        setPages(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
-    getPosts();
+    getPage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   return (
     <Container>
-      <h1 className="text-center my-4">Posts</h1>
-      <Button type="button" variant="success" className="my-4" onClick={() => navigate("/newpost")}>
-        Crea Nuovo Post
+      <h1 className="text-center my-4">Pages</h1>
+      <Button type="button" variant="success" className="my-4" onClick={() => navigate("/newpage")}>
+        Crea Nuova Pagina
       </Button>
       <Row>
-        {posts.map(post => {
+        {pages.map(page => {
           return (
-            <Col className="mb-3 text-center" xs={3} key={post.id}>
+            <Col className="mb-3 text-center" xs={6} key={page.id}>
               <div>
-                <SingleCard post={post} />
+                <SinglePage page={page} />
               </div>
             </Col>
           );
@@ -96,9 +96,9 @@ const Home = () => {
             </span>
           </li>
         </ul>
-      </nav>{" "}
+      </nav>
     </Container>
   );
 };
 
-export default Home;
+export default Page;

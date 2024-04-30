@@ -1,33 +1,13 @@
-import { useEffect, useState } from "react";
+import { Button, Col, Container, ListGroup, Row } from "react-bootstrap";
 import { baseUrl } from "../constant";
-import { Button, Col, Container, Row } from "react-bootstrap";
-import SingleCard from "./SingleCard";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Home = () => {
-  const [posts, setPosts] = useState([]);
+const Categories = () => {
+  const [categories, setCategories] = useState([]);
   const [lastPage, setLastPage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
-
-  const getPosts = () => {
-    fetch(`${baseUrl}/posts?page=${currentPage}&_embed=1`)
-      .then(response => {
-        if (response.ok) {
-          setLastPage(parseInt(response.headers.get("X-WP-TotalPages")));
-          return response.json();
-        } else {
-          throw new Error("Errore nel reperimento dei dati");
-        }
-      })
-      .then(data => {
-        console.log(data);
-        setPosts(data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
 
   const generatePaginationArray = () => {
     let paginationArr = [];
@@ -44,27 +24,59 @@ const Home = () => {
     setCurrentPage(page);
   };
 
+  const getCategories = () => {
+    fetch(`${baseUrl}/categories?page=${currentPage}&_embed=1`)
+      .then(response => {
+        if (response.ok) {
+          setLastPage(parseInt(response.headers.get("X-WP-TotalPages")));
+          return response.json();
+        } else {
+          throw new Error("errore nel reperimento dei dati");
+        }
+      })
+      .then(data => {
+        console.log(data);
+        setCategories(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
-    getPosts();
+    getCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   return (
     <Container>
-      <h1 className="text-center my-4">Posts</h1>
-      <Button type="button" variant="success" className="my-4" onClick={() => navigate("/newpost")}>
-        Crea Nuovo Post
+      <h1 className="text-center my-4">Categorie</h1>
+      <Button type="button" variant="success" className="my-4" onClick={() => navigate("/newcategory")}>
+        Crea Nuova Categoria
       </Button>
       <Row>
-        {posts.map(post => {
-          return (
-            <Col className="mb-3 text-center" xs={3} key={post.id}>
-              <div>
-                <SingleCard post={post} />
-              </div>
-            </Col>
-          );
-        })}
+        <Col xs={10} className="offset-1">
+          <ListGroup>
+            {categories.map(category => {
+              return (
+                <ListGroup.Item key={category.id}>
+                  <div className="d-flex justify-content-between">
+                    {category.name}
+                    <div>
+                      <Button
+                        type="button"
+                        className="text-end"
+                        onClick={() => navigate(`categorydetails/${category.id}`)}
+                      >
+                        Mostra Dettagli
+                      </Button>
+                    </div>
+                  </div>
+                </ListGroup.Item>
+              );
+            })}
+          </ListGroup>
+        </Col>
       </Row>
       <nav className="mt-3">
         <ul className="pagination justify-content-center">
@@ -96,9 +108,9 @@ const Home = () => {
             </span>
           </li>
         </ul>
-      </nav>{" "}
+      </nav>
     </Container>
   );
 };
 
-export default Home;
+export default Categories;
